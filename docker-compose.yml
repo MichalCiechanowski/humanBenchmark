@@ -1,0 +1,42 @@
+services:
+  postgres:
+    build: ./postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: hello_world_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - pern-network
+
+  backend:
+    build: ./server
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: hello_world_db
+    depends_on:
+      - postgres
+    volumes:
+      - ./server:/app/server
+    networks:
+      - pern-network
+
+  client:
+    build: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./client:/app/client
+    networks:
+      - pern-network
+
+networks:
+  pern-network:
+    driver: bridge
+
+volumes:
+  pgdata:
