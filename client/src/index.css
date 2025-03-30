@@ -5,6 +5,11 @@
   --orange: #FFB433;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+}
+
 html {
   background-color: var(--white);
   height: 100vh;
@@ -18,47 +23,58 @@ footer {
   bottom: 0;
   left: 0;
   text-align: center;
-
 }
 
 header {
   background-color: var(--dark-blue);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 10px 20px;
-}
 
-h1 {
-  flex-grow: 1;
-  text-align: center;
-  margin: 0;
-}
+  h1 {
+    flex-grow: 0;
+    text-align: center;
+    margin: 0;
+    order: 2;
+  }
 
-.header-buttons {
-  margin-right: auto;
-  text-align: center;
-}
+  .header-buttons {
+    position: absolute;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+  }
 
-.login-button {
-  padding: 8px 16px;
-  border: none;
-  cursor: pointer;
-}
+  .login-button {
+    background-color: var(--dark-blue);
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
 
-.login-button:hover {
-  background-color: var(--white);
+  .login-button:hover {
+    background-color: var(--white);
+  }
 }
 
 .game {
-  padding-top: 10%;
+  background-color: var(--light-blue);
   text-align: center;
+  padding: 20px 20px 20px 20px;
+
+  h2 {
+    padding-bottom: 20px;
+  }
 
   button {
+    margin-bottom: 20px;
     border: none;
     background-color: var(--orange);
     padding: 8px 16px 8px 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
   }
 
   button:hover {
@@ -69,9 +85,6 @@ h1 {
     padding: 10px 20% 10px 20%;
   }
 }
-
-
-
 
 body {
   margin: 0;
