@@ -1,3 +1,61 @@
+:root {
+  --dark-blue: #80CBC4;
+  --light-blue: #B4EBE6;
+  --white: #FBF8EF;
+  --orange: #FFB433;
+}
+
+html {
+  background-color: var(--white);
+  height: 100vh;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+footer {
+  background-color: var(--orange);
+  padding: 10px 0 10px 0;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+
+}
+
+header {
+  background-color: var(--dark-blue);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+h1 {
+  flex-grow: 1;
+  text-align: center;
+  margin: 0;
+}
+
+.header-buttons {
+  margin-right: auto;
+  text-align: center;
+}
+
+.login-button {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.login-button:hover {
+  background-color: var(--white);
+}
+
+.game {}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

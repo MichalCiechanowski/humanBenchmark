@@ -27,9 +27,22 @@ function App() {
   }, []);
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>{message || 'Loading...'}</h1>
-    </div>
+    <main>
+      <header>
+        <h1>Human Benchamrk</h1>
+        <div className='header-buttons'>
+          <button className='login-button'>SING UP</button>
+          <button className='login-button'>LOGIN</button>
+        </div>
+      </header>
+      <div className='game'>
+        <h2>Number Memory</h2>
+        <button>Start game</button>
+        <p className='game-description'>
+          Test will check how good is your Number memory. During test you will be presented with numbers of increasing length, you have to memorize it during 5 seconds and type the number. How far can you go?
+        </p>
+      </div>
+    </main>
   );
 }
 
