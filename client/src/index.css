@@ -50,7 +50,28 @@ h1 {
   background-color: var(--white);
 }
 
-.game {}
+.game {
+  padding-top: 10%;
+  text-align: center;
+
+  button {
+    border: none;
+    background-color: var(--orange);
+    padding: 8px 16px 8px 16px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: var(--light-blue);
+  }
+
+  p {
+    padding: 10px 20% 10px 20%;
+  }
+}
+
+
+
 
 body {
   margin: 0;
