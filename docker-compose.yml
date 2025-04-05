@@ -2,8 +2,8 @@ services:
   postgres:
     build: ./postgres
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: hello_world_db
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -13,8 +13,8 @@ services:
   backend:
     build: ./server
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: "password"
       POSTGRES_DB: hello_world_db
     depends_on:
       - postgres

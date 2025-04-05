@@ -32,6 +32,8 @@ header {
   align-items: center;
   padding: 10px 20px;
 
+
+
   h1 {
     flex-grow: 0;
     text-align: center;
@@ -57,6 +59,7 @@ header {
   .login-button:hover {
     background-color: var(--white);
   }
+
 }
 
 .game {
@@ -75,6 +78,7 @@ header {
     padding: 8px 16px 8px 16px;
     cursor: pointer;
     transition: background-color 0.3s ease-in-out;
+  
   }
 
   button:hover {
