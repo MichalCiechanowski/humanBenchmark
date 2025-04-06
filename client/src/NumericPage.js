@@ -17,7 +17,7 @@ export  function NumericGame() {
           setIsDisplaying(true);
           setUserInput('');
           setMessage('');
-          const displayTime = 10000;
+          const displayTime = 5000;
           setTimeout(() =>{
             setIsDisplaying(false);
             },displayTime);
