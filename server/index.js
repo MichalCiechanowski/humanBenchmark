@@ -13,14 +13,26 @@ const pool = new Pool({
   port: 5432,
 });
 
-app.get('/api/message', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT content FROM messages WHERE id = 1');
-    res.json({ message: result.rows[0].content });
-  } catch (err) {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Database error' });
-  }
+// app.get('/api/message', async (req, res) => {
+//   try {
+//     const result = await pool.query('SELECT content FROM messages WHERE id = 1');
+//     res.json({ message: result.rows[0].content });
+//   } catch (err) {
+//     console.error(err.stack);
+//     res.status(500).json({ error: 'Database error' });
+//   }
+// });
+
+const getRandomNumber = (len) => {
+  const min = Math.pow(10, len - 1);
+  const max = Math.pow(10, len) - 1;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+app.get('/api/random-number/:len', (req, res) => {
+  const len = parseInt(req.params.len, 10);
+  const number = getRandomNumber(len);
+  res.json({ number });
 });
 
 app.listen(port, () => {
