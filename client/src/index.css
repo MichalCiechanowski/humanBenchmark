@@ -46,6 +46,20 @@ header {
     gap: 10px;
   }
 
+  .go-back-button {
+    position: absolute;
+    left: 20px;
+    background-color: var(--dark-blue);
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  .go-back-button:hover {
+    background-color: var(--white);
+  }
+
   .login-button {
     background-color: var(--dark-blue);
     padding: 8px 16px;
@@ -59,7 +73,24 @@ header {
   }
 }
 
-.game {
+.menu {
+  height: 74vh;
+  margin: 50px;
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  justify-items: center;
+  align-items: center;
+  background-color: var(--light-blue);
+
+  button {
+    width: 100px;
+    height: 60px;
+  }
+}
+
+.numeric-memory {
   background-color: var(--light-blue);
   text-align: center;
   padding: 20px 20px 20px 20px;
