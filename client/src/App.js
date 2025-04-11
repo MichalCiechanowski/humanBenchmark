@@ -1,21 +1,44 @@
 import React, { useState, useEffect } from 'react';
 
 function App() {
+  const [loginState, setLoginState] = useState(false);
+  const [signupState, setSignupState] = useState(false);
+  const [isLogedIn, setIsLogedIn] = useState(false);
   const [menuState, setMenuState] = useState('menu');
   const [gameState, setGameState] = useState('initial');
   const [countdown, setCountdown] = useState(5);
+  const [inputValue, setInputValue] = useState('');
 
   const goToMenu = () => {
     setMenuState('menu');
+    setGameState('initial');
   }
 
   const goToNumericMemory = () => {
     setMenuState('numeric_memory');
+    setCountdown(5);
   }
 
   const startGame = () => {
     setGameState('countdown');
     setCountdown(5);
+  }
+
+  const handleInput = (event) => {
+    setInputValue(event.target.value);
+    console.log(inputValue)
+  }
+
+  const openLoginWindow = () => {
+    setLoginState(true);
+  }
+
+  const openSignUpWindow = () => {
+    setSignupState(true);
+  }
+
+  const numericGameServerCheck = () => {
+
   }
 
   useEffect(() => {
@@ -24,7 +47,7 @@ function App() {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            setGameState('playerInput');
+            setGameState('player_input');
             return 0;
           }
           return prev - 1;
@@ -37,20 +60,32 @@ function App() {
   return (
     <main>
       <header>
-        {menuState != 'menu' && (
+        {menuState !== 'menu' && (
           <button className='go-back-button' onClick={goToMenu}>Go back</button>
+        )}
+        {loginState === true && (
+          <div className='login'>
+            <p>Login</p>
+            <form className='login-form'>
+              <label for='fname'>First name: </label><br></br>
+              <input type='text' if='fname' name='fname'></input><br></br>
+              <label for='lname'>Last name: </label><br></br>
+              <input type='text' if='lname' name='lname'></input><br></br>
+              <button>Submit</button>
+            </form>
+          </div>
         )}
         <h1>Human Benchamrk</h1>
         <div className='header-buttons'>
-          <button className='login-button'>SING UP</button>
-          <button className='login-button'>LOGIN</button>
+          <button onClick={openLoginWindow} className='login-button'>SING UP</button>
+          <button onClick={openSignUpWindow} className='login-button'>LOGIN</button>
         </div>
       </header>
       {menuState == 'menu' && (
         <div className='menu'>
           <button onClick={goToNumericMemory}>Numeric Memory</button>
-          <button >Reaction Time</button>
-          <button >Visual Memory</button>
+          <button>Reaction Time</button>
+          <button>Visual Memory</button>
         </div>
       )}
       {menuState == 'numeric_memory' && (
@@ -65,10 +100,29 @@ function App() {
               <p>Time left{countdown}</p>
             </div>
           )}
-          {gameState === 'playerInput' && (
+          {gameState === 'player_input' && (
             <div>
-              <input placeholder="Enter the number"></input>
-              <button>Confirm</button>
+              <input
+                type="number"
+                placeholder="Enter the number"
+              />
+              <button onClick={numericGameServerCheck}>Confirm</button>
+            </div>
+          )}
+          {gameState === 'player_win' && (
+            <div>
+              <p>Number: placeholder</p>
+              <p>Your guess: placeholder</p>
+              <p>Score: </p>
+              <button onClick={startGame}>Play next level</button>
+            </div>
+          )}
+          {gameState === 'player_loose' && (
+            <div>
+              <p>Number: placeholder</p>
+              <p>Your guess: placeholder</p>
+              <p>Score: </p>
+              <button onClick={goToNumericMemory}>Play again</button>
             </div>
           )}
           <p className='game-description'>
