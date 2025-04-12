@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-
+import axios from 'axios'
+const API_ROUTE = 'http://localhost:5000'
 function App() {
+  const [randomNumber , setRandomNumber] = useState();
   const [loginState, setLoginState] = useState(false);
   const [signupState, setSignupState] = useState(false);
   const [isLogedIn, setIsLogedIn] = useState(false);
@@ -8,7 +10,8 @@ function App() {
   const [gameState, setGameState] = useState('initial');
   const [countdown, setCountdown] = useState(5);
   const [inputValue, setInputValue] = useState('');
-
+  const [digits , setDigits] = useState(1)
+  const [score , setScore] = useState(0)
   const goToMenu = () => {
     setMenuState('menu');
     setGameState('initial');
@@ -19,15 +22,21 @@ function App() {
     setCountdown(5);
   }
 
-  const startGame = () => {
-    setGameState('countdown');
-    setCountdown(5);
+const startGame = async()=>{
+  try{
+  setGameState('countdown')
+  setCountdown(5)
+  const response = await axios.get(`${API_ROUTE}/api/random-number/${digits}`);
+  setRandomNumber(response.data.number);
   }
+  catch(err)
+  {
+    alert('Error with fetchning numbers' , err)
+    setGameState('initial')
+  }
+}
 
-  const handleInput = (event) => {
-    setInputValue(event.target.value);
-    console.log(inputValue)
-  }
+
 
   const openLoginWindow = () => {
     setLoginState(true);
@@ -38,8 +47,20 @@ function App() {
   }
 
   const numericGameServerCheck = () => {
+    setGameState('player_input')
+    if (inputValue.toString() === randomNumber?.toString()){
+      setGameState('player_win')
+      setDigits(digits+1);
+      setScore(score+1)
 
+    }else{
+      setDigits(1)
+      setGameState('player_loose')
+      setScore(score)
+    }
   }
+
+
 
   useEffect(() => {
     if (gameState === 'countdown') {
@@ -63,10 +84,10 @@ function App() {
         {menuState !== 'menu' && (
           <button className='go-back-button' onClick={goToMenu}>Go back</button>
         )}
-        {loginState === true && (
-          <div className='login'>
+        {signupState === true &&  (
+          <div className='signup'>
             <p>Login</p>
-            <form className='login-form'>
+            <form className='Signup-form'>
               <label for='fname'>First name: </label><br></br>
               <input type='text' if='fname' name='fname'></input><br></br>
               <label for='lname'>Last name: </label><br></br>
@@ -96,33 +117,37 @@ function App() {
           )}
           {gameState === 'countdown' && (
             <div>
-              <p>placeholder</p>
-              <p>Time left{countdown}</p>
+              <p>{randomNumber}</p>
+              <p>Time left: {countdown}</p>
             </div>
           )}
           {gameState === 'player_input' && (
             <div>
+              <form onSubmit={numericGameServerCheck}>
               <input
                 type="number"
-                placeholder="Enter the number"
+                placeholder="Enter the number" 
+                value={inputValue}
+                onChange={(e)=>setInputValue(e.target.value)}
               />
-              <button onClick={numericGameServerCheck}>Confirm</button>
+              <button type='submit'>Check</button>
+              </form>
             </div>
           )}
           {gameState === 'player_win' && (
             <div>
-              <p>Number: placeholder</p>
-              <p>Your guess: placeholder</p>
-              <p>Score: </p>
+              <p>Number: {randomNumber}</p>
+              <p>Your guess: {inputValue}</p>
+              <p>Score: {score}</p>
               <button onClick={startGame}>Play next level</button>
             </div>
           )}
           {gameState === 'player_loose' && (
             <div>
-              <p>Number: placeholder</p>
-              <p>Your guess: placeholder</p>
-              <p>Score: </p>
-              <button onClick={goToNumericMemory}>Play again</button>
+              <p>Number: {randomNumber}</p>
+              <p>Your guess: {inputValue}</p>
+              <p>Score: {score}</p>
+              <button onClick={startGame}>Play again</button>
             </div>
           )}
           <p className='game-description'>

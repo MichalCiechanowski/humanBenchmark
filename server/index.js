@@ -1,40 +1,41 @@
 const express = require('express');
-const { Pool } = require('pg');
+const {pool} = require('./db_config.js')
+const {query} = require('./db_config.js')
 require('dotenv').config();
-
+const cors = require('cors');
 const app = express();
 const port = 5000;
 
-const pool = new Pool({
-  user: process.env.POSTGRES_USER,
-  host: 'postgres',
-  database: process.env.POSTGRES_DB,
-  password: process.env.POSTGRES_PASSWORD,
-  port: 5432,
-});
+const createTable = async()=>{
+  try{
+  await pool.query(`
+     CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        fname VARCHAR(50) UNIQUE NOT NULL,
+        lname VARCHAR(100) UNIQUE NOT NULL);
+    `); 
+    console.log("Table crated or exists")
+  }catch(err){
+    console.log('Error has occured' ,err)
+  }
 
-// app.get('/api/message', async (req, res) => {
-//   try {
-//     const result = await pool.query('SELECT content FROM messages WHERE id = 1');
-//     res.json({ message: result.rows[0].content });
-//   } catch (err) {
-//     console.error(err.stack);
-//     res.status(500).json({ error: 'Database error' });
-//   }
-// });
+}
+createTable()
 
-const getRandomNumber = (len) => {
-  const min = Math.pow(10, len - 1);
-  const max = Math.pow(10, len) - 1;
+app.use(cors())
+
+function getRandomNumber(digits) {
+  const min = Math.pow(10, digits - 1);
+  const max = Math.pow(10, digits) - 1;
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-app.get('/api/random-number/:len', (req, res) => {
-  const len = parseInt(req.params.len, 10);
-  const number = getRandomNumber(len);
-  res.json({ number });
+app.get('/api/random-number/:digits', (req, res) => {
+  const count = parseInt(req.params.digits) || 0;
+  const randomNumber = getRandomNumber(count);
+  res.json({number : randomNumber})
 });
 
-app.listen(port, () => {
+app.listen(port,  () => {
   console.log(`Server running on port ${port}`);
-});
+  });
