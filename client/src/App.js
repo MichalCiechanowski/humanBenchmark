@@ -12,6 +12,8 @@ function App() {
   const [inputValue, setInputValue] = useState('');
   const [digits , setDigits] = useState(1)
   const [score , setScore] = useState(0)
+  const [fname , setFname] = useState('')
+  const [lname , setLname] = useState('')
   const goToMenu = () => {
     setMenuState('menu');
     setGameState('initial');
@@ -33,6 +35,7 @@ const startGame = async()=>{
   {
     alert('Error with fetchning numbers' , err)
     setGameState('initial')
+
   }
 }
 
@@ -45,8 +48,19 @@ const startGame = async()=>{
   const openSignUpWindow = () => {
     setSignupState(true);
   }
+  const sendData = async () =>{ 
+  console.log(score)
+  const apiURL = `${API_ROUTE}/api/data/`
+  const res = await axios.post(apiURL ,{data :score} ).then(response => console.log(response))
+  .catch(err => console.error(err));
+   
+  }
+ 
 
   const numericGameServerCheck = () => {
+    if(digits == 1){
+      setScore(0)
+    }
     setGameState('player_input')
     if (inputValue.toString() === randomNumber?.toString()){
       setGameState('player_win')
@@ -56,10 +70,27 @@ const startGame = async()=>{
     }else{
       setDigits(1)
       setGameState('player_loose')
-      setScore(score)
+      sendData(score)
+
+
+
+      
     }
   }
+  const handleForm = async (event) =>{
+    event.preventDefault()
+    const formData = {fname , lname}
+    const apiURL = `${API_ROUTE}/api/form/`
+    console.log(formData , apiURL)
+    try{
+      const response = await axios.post(apiURL , formData).then(response=>console.log(response)).catch(err=>console.error(err))
 
+    }
+    catch(err){
+      console.error(err)
+    }
+
+  } 
 
 
   useEffect(() => {
@@ -87,19 +118,19 @@ const startGame = async()=>{
         {signupState === true &&  (
           <div className='signup'>
             <p>Login</p>
-            <form className='Signup-form'>
-              <label for='fname'>First name: </label><br></br>
-              <input type='text' if='fname' name='fname'></input><br></br>
+            <form className='Signup-form' onSubmit={handleForm}>
+              <label for='fname' >First name: </label><br></br>
+              <input type='text' if='fname' name='fname' value={fname} onChange={(e) => setFname(e.target.value)}></input><br></br>
               <label for='lname'>Last name: </label><br></br>
-              <input type='text' if='lname' name='lname'></input><br></br>
+              <input type='text' if='lname' name='lname'value={lname} onChange={(e) => setLname(e.target.value)}></input><br></br>
               <button>Submit</button>
             </form>
           </div>
         )}
         <h1>Human Benchamrk</h1>
         <div className='header-buttons'>
-          <button onClick={openLoginWindow} className='login-button'>SING UP</button>
-          <button onClick={openSignUpWindow} className='login-button'>LOGIN</button>
+          <button onClick={openSignUpWindow} className='login-button'>SING UP</button>
+          <button onClick={openLoginWindow} className='login-button'>LOGIN</button>
         </div>
       </header>
       {menuState == 'menu' && (
@@ -112,7 +143,7 @@ const startGame = async()=>{
       {menuState == 'numeric_memory' && (
         <div className='numeric-memory'>
           <h2>Number Memory</h2>
-          {gameState === 'initial' && (
+          {gameState === 'initial' &&  (
             <button onClick={startGame}>Start game</button>
           )}
           {gameState === 'countdown' && (
@@ -143,12 +174,15 @@ const startGame = async()=>{
             </div>
           )}
           {gameState === 'player_loose' && (
+           
             <div>
               <p>Number: {randomNumber}</p>
               <p>Your guess: {inputValue}</p>
               <p>Score: {score}</p>
               <button onClick={startGame}>Play again</button>
-            </div>
+            </div> 
+            
+            
           )}
           <p className='game-description'>
             Test will check how good is your Number memory. During test you will be presented with numbers of increasing length, you have to memorize it during 5 seconds and type the number. How far can you get?

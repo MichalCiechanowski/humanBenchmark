@@ -5,14 +5,22 @@ require('dotenv').config();
 const cors = require('cors');
 const app = express();
 const port = 5000;
-
+app.use(express.json()); 
 const createTable = async()=>{
   try{
   await pool.query(`
      CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         fname VARCHAR(50) UNIQUE NOT NULL,
-        lname VARCHAR(100) UNIQUE NOT NULL);
+        lname VARCHAR(100) UNIQUE NOT NULL
+        );
+
+      CREATE TABLE IF NOT EXISTS SCORE (
+           id SERIAL PRIMARY KEY,
+           fname VARCHAR(50) references users(fname),
+           lname VARCHAR(100) references users(lname),
+           Numbers INT
+           );
     `); 
     console.log("Table crated or exists")
   }catch(err){
@@ -35,6 +43,29 @@ app.get('/api/random-number/:digits', (req, res) => {
   const randomNumber = getRandomNumber(count);
   res.json({number : randomNumber})
 });
+app.post('/api/form/', async (req,res)=>{
+  const {fname , lname} = req.body
+  res.status(200).json({
+    success: true,
+    message: 'Data received successfully!',
+  })
+  try{
+  const result = await pool.query(
+    'INSERT INTO users (fname , lname) VALUES ($1, $2) RETURNING * '
+    , [fname , lname]
+  )
+
+}
+catch(err){
+  console.error(err)
+}
+})
+app.post('/api/data/',(req,res)=>{
+  const Number = req.body;
+  console.log(req.body)
+  res.json({number:Number})
+
+})
 
 app.listen(port,  () => {
   console.log(`Server running on port ${port}`);

@@ -131,12 +131,18 @@ code {
     monospace;
 }
 
-.login {
+.signup {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left:10.8%;
+  top:10%;
   transform: translate(-50%, -50%);
-  width: 30vw;
-  height: 70vh;
+  width: 15vw;
+  height: 20vh;
   background-color: var(--dark-blue);
+  .Signup-form{
+    display: flex;
+    flex: 1;
+    flex-direction:row;
+    flex-wrap: wrap;
+  }
 }
