@@ -43,19 +43,25 @@ const startGame = async()=>{
 
   const openLoginWindow = () => {
     setLoginState(true);
+    setSignupState(false);
   }
 
   const openSignUpWindow = () => {
     setSignupState(true);
+    setLoginState(false);
   }
   const sendData = async () =>{ 
-  console.log(score)
+  console.log(score , fname , lname)
   const apiURL = `${API_ROUTE}/api/data/`
-  const res = await axios.post(apiURL ,{data :score} ).then(response => console.log(response))
+  const res = await axios.post(apiURL ,{data :score , fname , lname} ).then(response => console.log(response))
   .catch(err => console.error(err));
    
   }
- 
+ const userlogedin = () =>{
+    setIsLogedIn(true)
+    setLoginState(false)
+    setSignupState(false)
+ }
 
   const numericGameServerCheck = () => {
     if(digits == 1){
@@ -83,7 +89,8 @@ const startGame = async()=>{
     const apiURL = `${API_ROUTE}/api/form/`
     console.log(formData , apiURL)
     try{
-      const response = await axios.post(apiURL , formData).then(response=>console.log(response)).catch(err=>console.error(err))
+      const response = await axios.post(apiURL , formData).then(response=>console.log(response))
+      setSignupState(false)
 
     }
     catch(err){
@@ -91,7 +98,32 @@ const startGame = async()=>{
     }
 
   } 
+const handleLogin = async(event) =>{
+  event.preventDefault()
+  const formData = {fname, lname}
+  const apiURL = `${API_ROUTE}/api/login/`
+  try{
+    const res = await axios.post(apiURL,formData)
+    console.log(res.data)
+    if(res.data.success){
+      alert("User is logged in")
+      setLoginState(false)
+      setIsLogedIn(true)
+      setFname(res.data.user.fname)
+      setLname(res.data.user.lname)
+    }
 
+  }
+  catch(err){
+    alert("Invalid user credentials")
+  }
+}
+const handleLogout = () =>{
+  setIsLogedIn(false)
+  setFname('')
+  setLname('')
+  alert("User logged out ")
+}
 
   useEffect(() => {
     if (gameState === 'countdown') {
@@ -117,7 +149,7 @@ const startGame = async()=>{
         )}
         {signupState === true &&  (
           <div className='signup'>
-            <p>Login</p>
+            <p>Sign up</p>
             <form className='Signup-form' onSubmit={handleForm}>
               <label for='fname' >First name: </label><br></br>
               <input type='text' if='fname' name='fname' value={fname} onChange={(e) => setFname(e.target.value)}></input><br></br>
@@ -127,13 +159,40 @@ const startGame = async()=>{
             </form>
           </div>
         )}
-        <h1>Human Benchamrk</h1>
+        {loginState === true && (
+          
+          <div className="login">
+            <p>Login</p>
+            <form  className="login-form" onSubmit={handleLogin}>
+            <label for='fname' >First name: </label><br></br>
+              <input type='text' if='fname' name='fname' value={fname} onChange={(e) => setFname(e.target.value)}></input><br></br>
+              <label for='lname'>Last name: </label><br></br>
+              <input type='text' if='lname' name='lname'value={lname} onChange={(e) => setLname(e.target.value)}></input><br></br>
+              <button>Submit</button>  
+            </form>
+          </div>
+        )}
+         <h1>Human Benchmark</h1>
+        {isLogedIn === true &&(
+          <div className="cred">
+            <p id="f">First Name :{fname}</p>
+            <p id="l">Last Name :{lname}</p>
+            <button id="Logout" onClick={handleLogout}>Logout</button>
+          </div>
+        )}
+       
         <div className='header-buttons'>
+          {!isLogedIn&&(
+          <>
           <button onClick={openSignUpWindow} className='login-button'>SING UP</button>
           <button onClick={openLoginWindow} className='login-button'>LOGIN</button>
+          </>
+          )}
         </div>
       </header>
+
       {menuState == 'menu' && (
+        
         <div className='menu'>
           <button onClick={goToNumericMemory}>Numeric Memory</button>
           <button>Reaction Time</button>

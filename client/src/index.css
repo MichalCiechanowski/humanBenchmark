@@ -28,15 +28,14 @@ footer {
 header {
   background-color: var(--dark-blue);
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
 
   h1 {
-    flex-grow: 0;
+    flex-grow: 1;
     text-align: center;
     margin: 0;
-    order: 2;
   }
 
   .header-buttons {
@@ -144,5 +143,43 @@ code {
     flex: 1;
     flex-direction:row;
     flex-wrap: wrap;
+  
+  }
+
+}
+.login {
+  position: absolute;
+  left:10.8%;
+  top:10%;
+  transform: translate(-50%, -50%);
+  width: 15vw;
+  height: 20vh;
+  background-color: var(--dark-blue);
+  .login-form{
+    display: flex;
+    flex: 1;
+    flex-direction:row;
+    flex-wrap: wrap;
+
+  
+  }
+
+  
+}
+.cred{
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-left: auto;
+
+  p{
+    flex-direction: column;
+  }
+  #logout{
+    display: flex;
+    margin: auto;
+    justify-content: center;
+    flex-direction: row;
+    align-items: flex-start;
   }
 }
