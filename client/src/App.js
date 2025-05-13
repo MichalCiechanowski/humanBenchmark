@@ -14,18 +14,30 @@ function App() {
   const [score , setScore] = useState(0)
   const [fname , setFname] = useState('')
   const [lname , setLname] = useState('')
+  const handlepaste = (event)=>{
+    event.preventDefault()
+  }
+
+
+
   const goToMenu = () => {
     setMenuState('menu');
     setGameState('initial');
   }
 
   const goToNumericMemory = () => {
-    setMenuState('numeric_memory');
-    setCountdown(5);
+    if(isLogedIn === true){setMenuState('numeric_memory');
+    setCountdown(5);}
+    else{
+      alert("User is not logged in")
+      goToMenu()
+    }
+    
   }
 
 const startGame = async()=>{
   try{
+
   setGameState('countdown')
   setCountdown(5)
   const response = await axios.get(`${API_ROUTE}/api/random-number/${digits}`);
@@ -55,6 +67,7 @@ const startGame = async()=>{
   const apiURL = `${API_ROUTE}/api/data/`
   const res = await axios.post(apiURL ,{data :score , fname , lname} ).then(response => console.log(response))
   .catch(err => console.error(err));
+
    
   }
  const userlogedin = () =>{
@@ -91,6 +104,7 @@ const startGame = async()=>{
     try{
       const response = await axios.post(apiURL , formData).then(response=>console.log(response))
       setSignupState(false)
+      alert("User was added to database")
 
     }
     catch(err){
@@ -107,8 +121,7 @@ const handleLogin = async(event) =>{
     console.log(res.data)
     if(res.data.success){
       alert("User is logged in")
-      setLoginState(false)
-      setIsLogedIn(true)
+      userlogedin()
       setFname(res.data.user.fname)
       setLname(res.data.user.lname)
     }
@@ -219,6 +232,7 @@ const handleLogout = () =>{
                 placeholder="Enter the number" 
                 value={inputValue}
                 onChange={(e)=>setInputValue(e.target.value)}
+                onPaste={handlepaste}
               />
               <button type='submit'>Check</button>
               </form>
