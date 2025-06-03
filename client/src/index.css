@@ -117,6 +117,25 @@ header {
   }
 }
 
+.reaction-time {
+  background-color: var(--light-blue);
+  text-align: center;
+  padding: 20px 20px 20px 20px;
+
+  button {
+    width: 150px;
+    height: 70px;
+  }
+
+  .not-button {
+    background-color: red;
+  }
+
+  .go-button {
+    background-color: green;
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

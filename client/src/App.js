@@ -5,13 +5,70 @@ function App() {
   const [signupState, setSignupState] = useState(false);
   const [isLogedIn, setIsLogedIn] = useState(false);
   const [menuState, setMenuState] = useState('menu');
-  const [gameState, setGameState] = useState('initial');
-  const [countdown, setCountdown] = useState(5);
-  const [inputValue, setInputValue] = useState('');
+  const [gameStateNumeric, setGameStateNumeric] = useState('initial');
+  const [gameStateReaction, setGameStateReaction] = useState('initial');
+  const [currentRound, setCurrentRound] = useState(1);
+  const [startTime, setStartTime] = useState(null);
+  const [currentReactionTime, setCurrentReactionTime] = useState(null);
+  const [reactionTimes, setReactionTimes] = useState([]);
+  const [bestScore, setBestScore] = useState(null);
+  const [averageScore, setAverageScore] = useState(null);
+  const [countdownNumeric, setCountdown] = useState(5);
+  const [inputValueNumeric, setInputValue] = useState('');
+
+  const nextRound = () => {
+    setCurrentRound(currentRound + 1);
+    setGameStateReaction('waiting');
+    setCurrentReactionTime(null);
+    triggerRandomDelay();
+  };
+
+  const resetGame = () => {
+    setGameStateReaction('initial');
+    setCurrentRound(1);
+    setReactionTimes([]);
+    setBestScore(null);
+    setAverageScore(null);
+    setCurrentReactionTime(null);
+  };
+
+  // Calculate average score when all rounds are complete
+  useEffect(() => {
+    if (currentRound === 5 && reactionTimes.length === 5) {
+      const avg = Math.round(
+        reactionTimes.reduce((sum, time) => sum + time, 0) / reactionTimes.length
+      );
+      setAverageScore(avg);
+    }
+  }, [reactionTimes]);
+  const startGameReaction = () => {
+    setGameStateReaction('waiting');
+    setCurrentRound(1);
+    setReactionTimes([]);
+    setBestScore(null);
+    setAverageScore(null);
+    triggerRandomDelay();
+  };
+
+  const triggerRandomDelay = () => {
+    const delay = Math.random() * 3000 + 1000; // Random delay between 1-4 seconds
+    setTimeout(() => {
+      setStartTime(Date.now());
+      setGameStateReaction('click');
+    }, delay);
+  };
+
+  const handleClick = (clickTime) => {
+    const reactionTime = clickTime - startTime;
+    setCurrentReactionTime(reactionTime);
+    setReactionTimes([...reactionTimes, reactionTime]);
+    setBestScore((prev) => (prev === null || reactionTime < prev ? reactionTime : prev));
+    setGameStateReaction('result');
+  };
 
   const goToMenu = () => {
     setMenuState('menu');
-    setGameState('initial');
+    setGameStateNumeric('initial');
   }
 
   const goToNumericMemory = () => {
@@ -19,14 +76,19 @@ function App() {
     setCountdown(5);
   }
 
-  const startGame = () => {
-    setGameState('countdown');
+  const goToReactionTime = () => {
+    resetGame();
+    setMenuState('reaction_time');
+  }
+
+  const startGameNumeric = () => {
+    setGameStateNumeric('countdown');
     setCountdown(5);
   }
 
   const handleInput = (event) => {
     setInputValue(event.target.value);
-    console.log(inputValue)
+    console.log(inputValueNumeric)
   }
 
   const openLoginWindow = () => {
@@ -42,12 +104,12 @@ function App() {
   }
 
   useEffect(() => {
-    if (gameState === 'countdown') {
+    if (gameStateNumeric === 'countdown') {
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            setGameState('player_input');
+            setGameStateNumeric('player_input');
             return 0;
           }
           return prev - 1;
@@ -55,7 +117,7 @@ function App() {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [gameState]);
+  }, [gameStateNumeric]);
 
   return (
     <main>
@@ -84,23 +146,23 @@ function App() {
       {menuState == 'menu' && (
         <div className='menu'>
           <button onClick={goToNumericMemory}>Numeric Memory</button>
-          <button>Reaction Time</button>
+          <button onClick={goToReactionTime}>Reaction Time</button>
           <button>Visual Memory</button>
         </div>
       )}
       {menuState == 'numeric_memory' && (
         <div className='numeric-memory'>
           <h2>Number Memory</h2>
-          {gameState === 'initial' && (
-            <button onClick={startGame}>Start game</button>
+          {gameStateNumeric === 'initial' && (
+            <button onClick={startGameNumeric}>Start game</button>
           )}
-          {gameState === 'countdown' && (
+          {gameStateNumeric === 'countdown' && (
             <div>
               <p>placeholder</p>
-              <p>Time left{countdown}</p>
+              <p>Time left{countdownNumeric}</p>
             </div>
           )}
-          {gameState === 'player_input' && (
+          {gameStateNumeric === 'player_input' && (
             <div>
               <input
                 type="number"
@@ -109,15 +171,15 @@ function App() {
               <button onClick={numericGameServerCheck}>Confirm</button>
             </div>
           )}
-          {gameState === 'player_win' && (
+          {gameStateNumeric === 'player_win' && (
             <div>
               <p>Number: placeholder</p>
               <p>Your guess: placeholder</p>
               <p>Score: </p>
-              <button onClick={startGame}>Play next level</button>
+              <button onClick={startGameNumeric}>Play next level</button>
             </div>
           )}
-          {gameState === 'player_loose' && (
+          {gameStateNumeric === 'player_loose' && (
             <div>
               <p>Number: placeholder</p>
               <p>Your guess: placeholder</p>
@@ -128,6 +190,51 @@ function App() {
           <p className='game-description'>
             Test will check how good is your Number memory. During test you will be presented with numbers of increasing length, you have to memorize it during 5 seconds and type the number. How far can you get?
           </p>
+        </div>
+      )}
+      {menuState === 'reaction_time' && (
+        <div className='reaction-time'>
+          <h2>Reaction Time</h2>
+
+          {gameStateReaction === 'initial' && (
+            <button onClick={startGameReaction}>Start game</button>
+          )}
+
+          {gameStateReaction === 'waiting' && (
+            <button className='not-button' disabled>Not yet</button>
+          )}
+
+          {gameStateReaction === 'click' && (
+            <button
+              className='go-button'
+              onClick={() => handleClick(Date.now())}
+            >
+              Click now!
+            </button>
+          )}
+
+          {gameStateReaction === 'result' && (
+            <div>
+              <p>Your reaction time: {currentReactionTime} ms</p>
+              {currentRound < 5 ? (
+                <button onClick={nextRound}>Next round</button>
+              ) : (
+                <div>
+                  <p>Best score: {bestScore} ms</p>
+                  <p>Average score: {averageScore} ms</p>
+                  <button onClick={resetGame}>Play again</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <p className='game-description'>
+            Test will check how good is your Reaction time. Test will show you red button when it will change to green click on it as fast as you can you will be shown your reaction time. Test will repite itself 5 times and save best score and average of scores from 5 tests. How fast are you?
+          </p>
+
+          {gameStateReaction !== 'initial' && gameStateReaction !== 'result' && (
+            <p>Round: {currentRound} / 5</p>
+          )}
         </div>
       )}
     </main>
