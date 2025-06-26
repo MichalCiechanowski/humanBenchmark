@@ -65,7 +65,7 @@ header {
   .go-back-button {
     position: absolute;
     left: 2rem;
-    background-color: transparent;
+    background-color: black;
     border: none;
     padding: 0.5rem 1rem;
     font-size: 1rem;
@@ -326,7 +326,7 @@ footer {
   /* Slightly darker gray on hover */
 }
 
-.login {
+.login , .signup {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -346,7 +346,7 @@ footer {
     margin-bottom: 1.5rem;
   }
 
-  .login-form {
+  .login-form , .Signup-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;

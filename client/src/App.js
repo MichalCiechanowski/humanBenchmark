@@ -1,24 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import axios from 'axios'
+
+const API_ROUTE = 'http://localhost:5000'
 
 function App() {
+  // Authentication states (from File 1)
   const [loginState, setLoginState] = useState(false);
   const [signupState, setSignupState] = useState(false);
   const [isLogedIn, setIsLogedIn] = useState(false);
+  const [fname, setFname] = useState('');
+  const [lname, setLname] = useState('');
+  
+  // Menu and game states
   const [menuState, setMenuState] = useState('menu');
   const [gameStateNumeric, setGameStateNumeric] = useState('initial');
   const [gameStateReaction, setGameStateReaction] = useState('initial');
   const [gameStateVisual, setGameStateVisual] = useState('initial');
+  
+  // Numeric Memory states
+  const [countdownNumeric, setCountdownNumeric] = useState(5);
+  const [inputValueNumeric, setInputValueNumeric] = useState('');
+  const [currentNumber, setCurrentNumber] = useState('');
+  const [numericScore, setNumericScore] = useState(0);
+  const [digits, setDigits] = useState(1);
+  
+  // Reaction Time states
   const [currentRound, setCurrentRound] = useState(1);
   const [startTime, setStartTime] = useState(null);
   const [currentReactionTime, setCurrentReactionTime] = useState(null);
   const [reactionTimes, setReactionTimes] = useState([]);
   const [bestScore, setBestScore] = useState(null);
   const [averageScore, setAverageScore] = useState(null);
-  const [countdownNumeric, setCountdown] = useState(5);
-  const [inputValueNumeric, setInputValue] = useState('');
-  const [currentNumber, setCurrentNumber] = useState(''); // New state for correct number
-  const [numericScore, setNumericScore] = useState(0); // New state for score
+  
   // Visual Memory states
   const [pattern, setPattern] = useState([]);
   const [playerInput, setPlayerInput] = useState([]);
@@ -29,62 +43,163 @@ function App() {
   const [showSuccessDelay, setShowSuccessDelay] = useState(false);
   const [isPatternGap, setIsPatternGap] = useState(false);
 
-  // Generate a random number with length based on round
-  const generateNumber = (length) => {
-    const min = Math.pow(10, length - 1);
-    const max = Math.pow(10, length) - 1;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  // Authentication functions (from File 1)
+  const handleForm = async (event) => {
+    event.preventDefault();
+    const formData = { fname, lname };
+    const apiURL = `${API_ROUTE}/api/form/`;
+    try {
+      const response = await axios.post(apiURL, formData);
+      console.log(response);
+      setSignupState(false);
+      alert("User was added to database");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const nextRoundNumeric = () => {
-    setNumericScore(numericScore + 1);
-    setInputValue('');
-    setGameStateNumeric('countdown');
-    setCountdown(5);
-    setCurrentNumber(generateNumber(numericScore + 2).toString()); // Increase length each round
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    const formData = { fname, lname };
+    const apiURL = `${API_ROUTE}/api/login/`;
+    try {
+      const res = await axios.post(apiURL, formData);
+      console.log(res.data);
+      if (res.data.success) {
+        alert("User is logged in");
+        userLogedIn();
+        setFname(res.data.user.fname);
+        setLname(res.data.user.lname);
+      }
+    } catch (err) {
+      alert("Invalid user credentials");
+    }
   };
 
-  const startGameNumeric = () => {
-    setGameStateNumeric('countdown');
-    setCountdown(5);
-    setNumericScore(0);
-    setInputValue('');
-    setCurrentNumber(generateNumber(1).toString()); // Start with 1-digit number
+  const handleLogout = () => {
+    setIsLogedIn(false);
+    setFname('');
+    setLname('');
+    alert("User logged out");
+  };
+
+  const userLogedIn = () => {
+    setIsLogedIn(true);
+    setLoginState(false);
+    setSignupState(false);
+  };
+
+  const sendData = async (score) => {
+    console.log(score, fname, lname);
+    const apiURL = `${API_ROUTE}/api/data/`;
+    try {
+      const res = await axios.post(apiURL, { data: score, fname, lname });
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlepaste = (event) => {
+    event.preventDefault();
+  };
+
+  // Navigation functions
+  const goToMenu = () => {
+    setMenuState('menu');
+    setGameStateNumeric('initial');
+    setGameStateReaction('initial');
+    setGameStateVisual('initial');
+  };
+
+  const goToNumericMemory = () => {
+    if (isLogedIn === true) {
+      setMenuState('numeric_memory');
+      setGameStateNumeric('initial');
+      setNumericScore(0);
+      setInputValueNumeric('');
+      setCurrentNumber('');
+      setDigits(1);
+      setCountdownNumeric(5);
+    } else {
+      alert("User is not logged in");
+      goToMenu();
+    }
+  };
+
+  const goToReactionTime = () => {
+    if (isLogedIn === true) {
+      resetGameReaction();
+      setMenuState('reaction_time');
+    } else {
+      alert("User is not logged in");
+      goToMenu();
+    }
+  };
+
+  const goToVisualMemory = () => {
+    if (isLogedIn === true) {
+      setMenuState('visual_memory');
+      setGameStateVisual('initial');
+      setPatternLength(1);
+      setVisualScore(0);
+      setPattern([]);
+      setPlayerInput([]);
+      setCurrentPatternIndex(-1);
+      setShowSuccessDelay(false);
+      setIsPatternGap(false);
+    } else {
+      alert("User is not logged in");
+      goToMenu();
+    }
+  };
+
+  const openLoginWindow = () => {
+    setLoginState(true);
+    setSignupState(false);
+  };
+
+  const openSignUpWindow = () => {
+    setSignupState(true);
+    setLoginState(false);
+  };
+
+  // Numeric Memory functions
+  const startGameNumeric = async () => {
+    try {
+      setGameStateNumeric('countdown');
+      setCountdownNumeric(5);
+      const response = await axios.get(`${API_ROUTE}/api/random-number/${digits}`);
+      setCurrentNumber(response.data.number.toString());
+    } catch (err) {
+      alert('Error with fetching numbers');
+      setGameStateNumeric('initial');
+    }
   };
 
   const numericGameServerCheck = () => {
-    if (inputValueNumeric === currentNumber) {
+    if (digits === 1) {
+      setNumericScore(0);
+    }
+    setGameStateNumeric('player_input');
+    
+    if (inputValueNumeric.toString() === currentNumber?.toString()) {
       setGameStateNumeric('player_win');
+      setDigits(digits + 1);
+      setNumericScore(numericScore + 1);
     } else {
+      setDigits(1);
       setGameStateNumeric('player_loose');
+      sendData(numericScore);
     }
   };
 
-  const nextRound = () => {
-    setCurrentRound(currentRound + 1);
-    setGameStateReaction('waiting');
-    setCurrentReactionTime(null);
-    triggerRandomDelay();
+  const nextRoundNumeric = () => {
+    setInputValueNumeric('');
+    startGameNumeric();
   };
 
-  const resetGame = () => {
-    setGameStateReaction('initial');
-    setCurrentRound(1);
-    setReactionTimes([]);
-    setBestScore(null);
-    setAverageScore(null);
-    setCurrentReactionTime(null);
-  };
-
-  useEffect(() => {
-    if (currentRound === 5 && reactionTimes.length === 5) {
-      const avg = Math.round(
-        reactionTimes.reduce((sum, time) => sum + time, 0) / reactionTimes.length
-      );
-      setAverageScore(avg);
-    }
-  }, [reactionTimes]);
-
+  // Reaction Time functions
   const startGameReaction = () => {
     setGameStateReaction('waiting');
     setCurrentRound(1);
@@ -92,6 +207,15 @@ function App() {
     setBestScore(null);
     setAverageScore(null);
     triggerRandomDelay();
+  };
+
+  const resetGameReaction = () => {
+    setGameStateReaction('initial');
+    setCurrentRound(1);
+    setReactionTimes([]);
+    setBestScore(null);
+    setAverageScore(null);
+    setCurrentReactionTime(null);
   };
 
   const triggerRandomDelay = () => {
@@ -110,53 +234,17 @@ function App() {
     setGameStateReaction('result');
   };
 
-  const goToMenu = () => {
-    setMenuState('menu');
-    setGameStateNumeric('initial');
-    setGameStateVisual('initial');
+  const nextRound = () => {
+    setCurrentRound(currentRound + 1);
+    setGameStateReaction('waiting');
+    setCurrentReactionTime(null);
+    triggerRandomDelay();
   };
-
-  const goToNumericMemory = () => {
-    setMenuState('numeric_memory');
-    setGameStateNumeric('initial');
-    setNumericScore(0);
-    setInputValue('');
-    setCurrentNumber('');
-  };
-
-  const goToReactionTime = () => {
-    resetGame();
-    setMenuState('reaction_time');
-  };
-
-  const goToVisualMemory = () => {
-    setMenuState('visual_memory');
-    setGameStateVisual('initial');
-    setPatternLength(1);
-    setVisualScore(0);
-    setPattern([]);
-    setPlayerInput([]);
-    setCurrentPatternIndex(-1);
-    setShowSuccessDelay(false);
-    setIsPatternGap(false);
-  };
-
-  const handleInput = (event) => {
-    setInputValue(event.target.value);
-  };
-
-  const openLoginWindow = () => {
-    setLoginState(true);
-  };
-
-  const openSignUpWindow = () => {
-    setSignupState(true);
-  };
-
-  // Visual Memory game logic
+  
+  // Visual Memory functions
   const addToPattern = () => {
     const newPattern = [...pattern];
-    const newSquare = Math.floor(Math.random() * 9); // Allow repeated squares
+    const newSquare = Math.floor(Math.random() * 9);
     newPattern.push(newSquare);
     return newPattern;
   };
@@ -166,14 +254,14 @@ function App() {
     setCurrentPatternIndex(-1);
     setShowSuccessDelay(false);
     setIsPatternGap(false);
-    // Initialize or expand pattern
+    
     if (pattern.length === 0) {
       setPattern(addToPattern());
     }
-    // Skip countdown if not the first round
+    
     if (visualScore > 0) {
       setGameStateVisual('show_pattern');
-      setCurrentPatternIndex(0); // Start with first square
+      setCurrentPatternIndex(0);
     } else {
       setGameStateVisual('countdown');
       setCountdownVisual(3);
@@ -184,20 +272,22 @@ function App() {
     if (gameStateVisual === 'player_input') {
       const currentInput = [...playerInput, index];
       setPlayerInput(currentInput);
-      // Check if the clicked square is correct in the exact order
       const currentInputIndex = currentInput.length - 1;
+      
       if (pattern[currentInputIndex] !== index) {
         setGameStateVisual('player_loose');
+        sendData(visualScore);
       } else if (currentInput.length === pattern.length) {
-        setShowSuccessDelay(true); // Trigger delay to show green squares
+        setShowSuccessDelay(true);
       }
     }
   };
 
+  // useEffect hooks
   useEffect(() => {
     if (gameStateNumeric === 'countdown') {
       const timer = setInterval(() => {
-        setCountdown((prev) => {
+        setCountdownNumeric((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
             setGameStateNumeric('player_input');
@@ -217,7 +307,7 @@ function App() {
           if (prev <= 1) {
             clearInterval(timer);
             setGameStateVisual('show_pattern');
-            setCurrentPatternIndex(0); // Start with first square
+            setCurrentPatternIndex(0);
             return 0;
           }
           return prev - 1;
@@ -230,14 +320,13 @@ function App() {
   useEffect(() => {
     if (gameStateVisual === 'show_pattern' && currentPatternIndex >= 0) {
       if (currentPatternIndex < pattern.length) {
-        let delay = 1000; // Default 1-second glow
-        // If next square is the same, insert a 200ms gap
+        let delay = 1000;
         if (
           currentPatternIndex < pattern.length - 1 &&
           pattern[currentPatternIndex] === pattern[currentPatternIndex + 1]
         ) {
           setIsPatternGap(true);
-          delay = 200; // Shorten delay for gap
+          delay = 200;
         } else {
           setIsPatternGap(false);
         }
@@ -247,7 +336,7 @@ function App() {
         return () => clearTimeout(timer);
       } else {
         setGameStateVisual('player_input');
-        setCurrentPatternIndex(-1); // Reset for next round
+        setCurrentPatternIndex(-1);
         setIsPatternGap(false);
       }
     }
@@ -258,13 +347,23 @@ function App() {
       const timer = setTimeout(() => {
         setVisualScore(visualScore + 1);
         setPatternLength(patternLength + 1);
-        setPattern(addToPattern()); // Expand pattern for next round
+        setPattern(addToPattern());
         setGameStateVisual('player_win');
         setShowSuccessDelay(false);
-      }, 1000); // Show green squares for 1 second
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, [showSuccessDelay, pattern, visualScore, patternLength]);
+
+  useEffect(() => {
+    if (currentRound === 5 && reactionTimes.length === 5) {
+      const avg = Math.round(
+        reactionTimes.reduce((sum, time) => sum + time, 0) / reactionTimes.length
+      );
+      setAverageScore(avg);
+      sendData(bestScore); // Send best reaction time as score
+    }
+  }, [reactionTimes]);
 
   return (
     <main>
@@ -272,24 +371,77 @@ function App() {
         {menuState !== 'menu' && (
           <button className='go-back-button' onClick={goToMenu}>Go back</button>
         )}
-        {loginState === true && (
-          <div className='login'>
-            <p>Login</p>
-            <form className='login-form'>
+        
+        {signupState === true && (
+          <div className='signup'>
+            <p>Sign up</p>
+            <form className='Signup-form' onSubmit={handleForm}>
               <label htmlFor='fname'>First name: </label><br />
-              <input type='text' id='fname' name='fname' /><br />
+              <input 
+                type='text' 
+                id='fname' 
+                name='fname' 
+                value={fname} 
+                onChange={(e) => setFname(e.target.value)}
+              /><br />
               <label htmlFor='lname'>Last name: </label><br />
-              <input type='text' id='lname' name='lname' /><br />
+              <input 
+                type='text' 
+                id='lname' 
+                name='lname' 
+                value={lname} 
+                onChange={(e) => setLname(e.target.value)}
+              /><br />
               <button>Submit</button>
             </form>
           </div>
         )}
+        
+        {loginState === true && (
+          <div className="login">
+            <p>Login</p>
+            <form className="login-form" onSubmit={handleLogin}>
+              <label htmlFor='fname'>First name: </label><br />
+              <input 
+                type='text' 
+                id='fname' 
+                name='fname' 
+                value={fname} 
+                onChange={(e) => setFname(e.target.value)}
+              /><br />
+              <label htmlFor='lname'>Last name: </label><br />
+              <input 
+                type='text' 
+                id='lname' 
+                name='lname' 
+                value={lname} 
+                onChange={(e) => setLname(e.target.value)}
+              /><br />
+              <button>Submit</button>
+            </form>
+          </div>
+        )}
+        
         <h1>Human Benchmark</h1>
+        
+        {isLogedIn === true && (
+          <div className="cred">
+            <p id="f">First Name: {fname}</p>
+            <p id="l">Last Name: {lname}</p>
+            <button id="Logout" onClick={handleLogout}>Logout</button>
+          </div>
+        )}
+        
         <div className='header-buttons'>
-          <button onClick={openLoginWindow} className='login-button'>SIGN UP</button>
-          <button onClick={openSignUpWindow} className='login-button'>LOGIN</button>
+          {!isLogedIn && (
+            <>
+              <button onClick={openSignUpWindow} className='login-button'>SIGN UP</button>
+              <button onClick={openLoginWindow} className='login-button'>LOGIN</button>
+            </>
+          )}
         </div>
       </header>
+
       {menuState === 'menu' && (
         <div className='menu'>
           <button onClick={goToNumericMemory}>Numeric Memory</button>
@@ -297,28 +449,31 @@ function App() {
           <button onClick={goToVisualMemory}>Visual Memory</button>
         </div>
       )}
+
       {menuState === 'numeric_memory' && (
         <div className='numeric-memory'>
-          <h2>Number Memory Test</h2>
+          <h2>Number Memory</h2>
           {gameStateNumeric === 'initial' && (
             <button onClick={startGameNumeric}>Start game</button>
           )}
           {gameStateNumeric === 'countdown' && (
             <div>
-              <p>Memorize the number</p>
               <p>{currentNumber}</p>
               <p>Time left: {countdownNumeric}</p>
             </div>
           )}
           {gameStateNumeric === 'player_input' && (
             <div>
-              <input
-                type="number"
-                value={inputValueNumeric}
-                onChange={handleInput}
-                placeholder="Enter the number"
-              />
-              <button onClick={numericGameServerCheck}>Confirm</button>
+              <form onSubmit={numericGameServerCheck}>
+                <input
+                  type="number"
+                  placeholder="Enter the number"
+                  value={inputValueNumeric}
+                  onChange={(e) => setInputValueNumeric(e.target.value)}
+                  onPaste={handlepaste}
+                />
+                <button type='submit'>Check</button>
+              </form>
             </div>
           )}
           {gameStateNumeric === 'player_win' && (
@@ -334,7 +489,7 @@ function App() {
               <p>Number: {currentNumber}</p>
               <p>Your guess: {inputValueNumeric}</p>
               <p>Score: {numericScore}</p>
-              <button onClick={goToNumericMemory}>Play again</button>
+              <button onClick={startGameNumeric}>Play again</button>
             </div>
           )}
           <p className='game-description'>
@@ -342,6 +497,7 @@ function App() {
           </p>
         </div>
       )}
+
       {menuState === 'reaction_time' && (
         <div className='reaction-time'>
           <h2>Reaction Time</h2>
@@ -368,7 +524,7 @@ function App() {
                 <div>
                   <p>Best score: {bestScore} ms</p>
                   <p>Average score: {averageScore} ms</p>
-                  <button onClick={resetGame}>Play again</button>
+                  <button onClick={resetGameReaction}>Play again</button>
                 </div>
               )}
             </div>
@@ -381,6 +537,7 @@ function App() {
           )}
         </div>
       )}
+
       {menuState === 'visual_memory' && (
         <div className='visual-memory'>
           <h2>Visual Memory</h2>
@@ -408,9 +565,13 @@ function App() {
                 {Array(9).fill().map((_, index) => (
                   <div
                     key={index}
-                    className={`square ${gameStateVisual === 'show_pattern' && !isPatternGap && currentPatternIndex >= 0 && pattern[currentPatternIndex] === index ? 'pattern-active' :
-                      (gameStateVisual === 'player_input' || showSuccessDelay) && playerInput.includes(index) ? 'selected' : ''
-                      }`}
+                    className={`square ${
+                      gameStateVisual === 'show_pattern' && !isPatternGap && currentPatternIndex >= 0 && pattern[currentPatternIndex] === index 
+                        ? 'pattern-active' 
+                        : (gameStateVisual === 'player_input' || showSuccessDelay) && playerInput.includes(index) 
+                        ? 'selected' 
+                        : ''
+                    }`}
                     onClick={() => handleSquareClick(index)}
                   />
                 ))}
